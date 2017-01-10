@@ -2,24 +2,15 @@
 
 import sys
 
-from random import choice
+#from random import choice
 
 
-def get_ratings(file):
-    """Prints out restaurant names and ratings from file."""
+def get_ratings(filename):
+    """Print out restaurant names and ratings from file."""
 
-    # Opens file
-    ratings_file = open(file)
-
-    # Creates empty dictionary
-    ratings = {}
-
-    for restaurant in ratings_file:
-        # Strips off "/n" and splits on ":"
-        restaurant_name, restaurant_rating = restaurant.rstrip().split(':')
-        # Inputs restaurant name and rating into dictionary
-        ratings[restaurant_name] = restaurant_rating
-
+    # Reads ratings data from file into dictionary
+    ratings = read_ratings_from_file(filename)
+    
     while True:
         print "If you'd like to see the restaurant ratings, press 1."
         print "If you'd like to rate a new restaurant, press 2."
@@ -28,24 +19,28 @@ def get_ratings(file):
 
         selection = raw_input("> ")
 
-        print ""
+        print 
 
         if selection == "1":
-            # Print out name and rating for all restaurants in ratings dict
-            for restaurant, rating in sorted(ratings.items()):
-                print "%s is rated at %s" % (restaurant, rating)
+            print_ratings(ratings)
 
         elif selection == "2":
             # Collect information from user on a restaurant rating
             new_restaurant = raw_input("Please input a restaurant: ")
-            new_rating = raw_input("Please input a rating for the restaurant (as a digit): ")
-            new_rating = int(new_rating)
-            ratings[new_restaurant] = new_rating
+            new_rating = raw_input(
+                "Please input a rating for the restaurant (as a digit): ")
+            try:
+                new_rating = int(new_rating)
+                ratings[new_restaurant] = new_rating
+            except ValueError:
+                print "Invalid input"
+                continue
+            
+
+            print "Restaurant %s has been updated \n" % (new_restaurant)
 
         elif selection == "3":
-            # Print out existing ratings
-            for restaurant, rating in sorted(ratings.items()):
-                print "%s is rated at %s" % (restaurant, rating)
+            print_ratings(ratings)
 
             while True:
                 # Ask to update a rating
@@ -58,17 +53,53 @@ def get_ratings(file):
                     continue
 
                 else:
-                    updated_rating = raw_input("What would you like the new rating to be? > ")
-                    ratings[selected_restaurant] = updated_rating
+                    updated_rating = raw_input(
+                        "What would you like the new rating to be? > ")
+                    ratings[selected_restaurant] = int(updated_rating)
                     break
 
-            print "%s is now rated at %s \n" % (selected_restaurant, ratings[selected_restaurant])
+            print "%s is now rated at %s \n" % (
+                selected_restaurant, ratings[selected_restaurant]
+            )
 
         elif selection == "4":
             break
 
         else:
             print "That is not a valid option."
+
+
+def read_ratings_from_file(filename):
+    """Open file and creates dictionary from data.
+
+    Reads lines from file that contain <restaurant name>:<rating>.
+    Returns a dictionary with restaurants as keys and ratings as values
+    """
+
+    # Opens file
+    ratings_file = open(filename)
+
+    # Creates empty dictionary
+    ratings = {}
+
+    for restaurant in ratings_file:
+        # Strips off "/n" and splits on ":"
+        restaurant_name, restaurant_rating = restaurant.rstrip().split(':')
+        # Inputs restaurant name and rating into dictionary
+        ratings[restaurant_name] = restaurant_rating
+
+    return ratings
+
+
+def print_ratings(ratings):
+    """Print each restaurant and its ratings in the ratings dictionary"""
+
+    # Print out name and rating for all restaurants in ratings dict
+    for restaurant, rating in sorted(ratings.items()):
+        print "%s is rated at %s" % (restaurant, rating)
+
+    print ""
+
 
 
 restaurant_file = sys.argv[1]
